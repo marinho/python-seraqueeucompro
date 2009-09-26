@@ -12,14 +12,13 @@ sys.path.insert(0, lib_path)
 
 import seraqueeucompro
 
-PERSISTENTE = False
-
 class ApiTest(unittest.TestCase):
+    persistente = False
     chave = '12345678901234567890123456789012'
-    API_BASE_URL = 'http://www.seraqueeucompro.com/api/1.0'
+    api_base_url = 'http://www.seraqueeucompro.com/api/1.0'
     
     def setUp(self):
-        if PERSISTENTE:
+        if self.persistente:
             self._urllib = urllib
         else:
             self._urllib = MockUrllib()
@@ -28,25 +27,230 @@ class ApiTest(unittest.TestCase):
         api.set_urllib(self._urllib)
         self._api = api
 
+    # TESTES - O QUE REALMENTE IMPORTA - INICIO
+
     def test_validar_chave(self):
         """Efetua a validacao da chave informada."""
-        self._AddHandler(self.API_BASE_URL+'/validar-chave/?chave='+self.chave,
+        self._AddHandler(self.api_base_url+'/validar-chave/?chave='+self.chave,
                      curry(self._OpenTestData, 'validar-chave.json'))
 
         self.assertTrue(self._api.validar_chave())
 
     def test_validar_chave_invalida(self):
         """Efetua a validacao da chave informada, sendo ela invalida."""
-        self._AddHandler(self.API_BASE_URL+'/validar-chave/?chave=123',
+        self._AddHandler(self.api_base_url+'/validar-chave/?chave=123',
                      curry(self._OpenTestData, 'validar-chave-invalida.json'))
 
         self.assertRaises(seraqueeucompro.ChaveInvalida, self._api.validar_chave, '123')
+
+    def test_pesquisar(self):
+        """Efetua uma pesquisa no site pelas palavras-chave informadas."""
+        self._AddHandler(self.api_base_url+'/pesquisar/?q=produto%20encontrado',
+                     curry(self._OpenTestData, 'pesquisar.json'))
+
+        lista = self._api.pesquisar('produto encontrado')
+        self.assertEqual(lista, [
+            {
+                'titulo': 'Volkswagen Fusca 69',
+                'url': 'http://www.seraqueeucompro.com/produtos/3/',
+                'detalhes': 'Classico vintage da montadora alema',
+                },
+            {
+                'titulo': 'Vale a pena comprar um Fusca original?',
+                'url': 'http://www.seraqueeucompro.com/perguntas/37/',
+                'detalhes': 'Estou em duvida entre um Fusca original ou restaurar um',
+                },
+            ])
+
+    def test_listar_perguntas_por_id(self):
+        """Efetua uma requisicao de perguntas de um produto - por ID do produto."""
+        self._AddHandler(self.api_base_url+'/listar-perguntas/?produto_id=18',
+                     curry(self._OpenTestData, 'listar-perguntas-por-id.json'))
+
+        lista = self._api.listar_perguntas(produto_id=18)
+        self.assertEqual(lista, [
+            {
+                'titulo': 'Vale a pena comprar um Fusca original?',
+                'url': 'http://www.seraqueeucompro.com/perguntas/37/',
+                'detalhes': 'Estou em duvida entre um Fusca original ou restaurar um',
+                'data': '2009-09-26 09:01:33',
+                'respostas': [
+                    {
+                        'usuario': 'marinho@seraqueucompro.com.br',
+                        'texto': 'Eu acho que voce deve comprar!',
+                        'data': '2009-09-26 10:01:33',
+                        },
+                    ],
+                },
+            ])
+
+    def test_listar_perguntas_por_nome(self):
+        """Efetua uma requisicao de perguntas de um produto - por marca e nome."""
+        self._AddHandler(self.api_base_url+'/listar-perguntas/?produto_nome=Fusca&produto_marca=Volkswagen',
+                     curry(self._OpenTestData, 'listar-perguntas-por-nome.json'))
+
+        lista = self._api.listar_perguntas(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(lista, [
+            {
+                'titulo': 'Vale a pena comprar um Fusca original?',
+                'url': 'http://www.seraqueeucompro.com/perguntas/32/',
+                'detalhes': 'Estou em duvida entre um Fusca original ou restaurar um',
+                'data': '2009-09-26 09:01:33',
+                'respostas': [
+                    {
+                        'usuario': 'marinho@seraqueucompro.com.br',
+                        'texto': 'Eu acho que voce deve comprar!',
+                        'data': '2009-09-26 10:01:33',
+                        },
+                    ],
+                },
+            ])
+
+    def test_listar_opinioes_por_id(self):
+        """Efetua uma requisicao de opinioes de um produto - por ID do produto."""
+        self._AddHandler(self.api_base_url+'/listar-opinioes/?produto_id=18',
+                     curry(self._OpenTestData, 'listar-opinioes-por-id.json'))
+
+        lista = self._api.listar_opinioes(produto_id=18)
+        self.assertEqual(lista, [
+            {
+                'titulo': 'Nao gostei do volante e nem do cambio',
+                'url': 'http://www.seraqueeucompro.com/opinioes/37/',
+                'detalhes': 'Eh isso aih',
+                'data': '2009-09-26 09:01:33',
+                'avaliacao': 4,
+                'comentarios': [
+                    {
+                        'usuario': 'marinho@seraqueucompro.com.br',
+                        'texto': 'Discordo!',
+                        'data': '2009-09-26 10:01:33',
+                        },
+                    ],
+                },
+            ])
+
+    def test_listar_opinioes_por_nome(self):
+        """Efetua uma requisicao de opinioes de um produto - por marca e nome."""
+        self._AddHandler(self.api_base_url+'/listar-opinioes/?produto_nome=Fusca&produto_marca=Volkswagen',
+                     curry(self._OpenTestData, 'listar-opinioes-por-nome.json'))
+
+        lista = self._api.listar_opinioes(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(lista, [
+            {
+                'titulo': 'Nao gostei do volante e nem do cambio',
+                'url': 'http://www.seraqueeucompro.com/opinioes/32/',
+                'detalhes': 'Eh isso aih',
+                'data': '2009-09-26 09:01:33',
+                'avaliacao': 4,
+                'comentarios': [
+                    {
+                        'usuario': 'marinho@seraqueucompro.com.br',
+                        'texto': 'Discordo!',
+                        'data': '2009-09-26 10:01:33',
+                        },
+                    ],
+                },
+            ])
+
+    def test_listar_links_por_id(self):
+        """Efetua uma requisicao de links de um produto - por ID do produto."""
+        self._AddHandler(self.api_base_url+'/listar-links/?produto_id=18',
+                     curry(self._OpenTestData, 'listar-links-por-id.json'))
+
+        lista = self._api.listar_links(produto_id=18)
+        self.assertEqual(lista, [
+            'http://www.teste.com',
+            'http://pt.wikipedia.org/wiki/Fusca',
+            ])
+
+    def test_listar_links_por_nome(self):
+        """Efetua uma requisicao de links de um produto - por marca e nome."""
+        self._AddHandler(self.api_base_url+'/listar-links/?produto_nome=Fusca&produto_marca=Volkswagen',
+                     curry(self._OpenTestData, 'listar-links-por-nome.json'))
+
+        lista = self._api.listar_links(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(lista, [
+            'http://www.teste.com',
+            'http://pt.wikipedia.org/wiki/Fusca',
+            ])
+
+    def test_listar_imagens_por_id(self):
+        """Efetua uma requisicao de imagens de um produto - por ID do produto."""
+        self._AddHandler(self.api_base_url+'/listar-imagens/?produto_id=18',
+                     curry(self._OpenTestData, 'listar-imagens-por-id.json'))
+
+        lista = self._api.listar_imagens(produto_id=18)
+        self.assertEqual(lista, [
+            'http://localhost:8080/imagens/30/',
+            'http://teste.com/foto.jpg',
+            ])
+
+    def test_listar_imagens_por_nome(self):
+        """Efetua uma requisicao de imagens de um produto - por marca e nome."""
+        self._AddHandler(self.api_base_url+'/listar-imagens/?produto_nome=Fusca&produto_marca=Volkswagen',
+                     curry(self._OpenTestData, 'listar-imagens-por-nome.json'))
+
+        lista = self._api.listar_imagens(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(lista, [
+            'http://localhost:8080/imagens/30/',
+            'http://teste.com/foto.jpg',
+            ])
+
+    def test_produto_info_por_id(self):
+        """Efetua uma requisicao de informacoes de um produto - por ID do produto."""
+        self._AddHandler(self.api_base_url+'/info-produto/?produto_id=18',
+                     curry(self._OpenTestData, 'info-produto-por-id.json'))
+
+        info = self._api.info_produto(produto_id=18)
+        self.assertEqual(info, {
+            'nome': 'Fusca',
+            'marca': 'Volkswagen',
+            'url': 'http://www.seraqueeucompro.com/produtos/18/',
+            'produto_url': 'http://www.fusca.com',
+            'categoria': 'Automoveis',
+            'slug': 'fusca',
+            'tags': ['carros','esporte','classicos'],
+            'descricao': 'O Fusca foi o carro mais vendido da historia do automovel',
+            })
+
+    def test_produto_info_por_nome(self):
+        """Efetua uma requisicao de informacoes de um produto - por marca e nome."""
+        self._AddHandler(self.api_base_url+'/info-produto/?produto_nome=Fusca&produto_marca=Volkswagen',
+                     curry(self._OpenTestData, 'info-produto-por-nome.json'))
+
+        info = self._api.info_produto(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(info, {
+            'nome': 'Fusca',
+            'marca': 'Volkswagen',
+            'url': 'http://www.seraqueeucompro.com/produtos/18/',
+            'produto_url': 'http://www.fusca.com',
+            'categoria': 'Automoveis',
+            'slug': 'fusca',
+            'tags': ['carros','esporte','classicos'],
+            'descricao': 'O Fusca foi o carro mais vendido da historia do automovel',
+            })
+
+    def test_produto_painel_url_por_id(self):
+        """Efetua uma requisicao de informacoes de um produto - por ID do produto."""
+        url = self._api.painel_produto_url(produto_id=18)
+        self.assertEqual(url, self.api_base_url+'/painel-produto/?produto_id=18')
+
+    def test_produto_painel_url_por_nome(self):
+        """Efetua uma requisicao de informacoes de um produto - por marca e nome."""
+        url = self._api.painel_produto_url(produto_nome='Fusca', produto_marca='Volkswagen')
+        self.assertEqual(url, self.api_base_url+'/painel-produto/?produto_nome=Fusca&produto_marca=Volkswagen')
+
+    # TESTES - O QUE REALMENTE IMPORTA - FINAL
 
     def _AddHandler(self, url, callback):
         self._urllib.AddHandler(url, callback)
 
     def _OpenTestData(self, filename):
         return open(os.path.join('testdata',filename))
+
+#class ApiPersistenteTest(ApiTest):
+#    persistente = True
+#    api_base_url = 'http://localhost:8080/api/1.0'
 
 class MockUrllib(object):
     '''A mock replacement for urllib that hardcodes specific responses.'''
