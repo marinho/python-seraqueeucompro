@@ -49,7 +49,7 @@ class Api(object):
     def validar_retorno(self, ret):
         try:
             if ret['res'] != RESULT_OK:
-                raise ChaveInvalida(ret['msg'])
+                raise RetornoInvalido(ret['msg'])
         except KeyError:
             raise RetornoInvalido('URL nao retornou resultados.')
 
@@ -61,7 +61,11 @@ class Api(object):
         chave = chave or self.chave
         cont = self.get_url('/validar-chave/?chave='+chave)
 
-        self.validar_retorno(cont)        
+        try:
+            self.validar_retorno(cont)
+        except RetornoInvalido, e:
+            raise ChaveInvalida(unicode(e))
+        
         return True
 
     def pesquisar(self, palavras):
@@ -145,4 +149,28 @@ class Api(object):
             return self.api_base_url+'/painel-produto/?produto_nome=Fusca&produto_marca=Volkswagen'
 
         raise Exception('Informe o ID ou o nome e marca do produto')
+
+    def salvar_opiniao(self, **kwargs):
+        cont = self.get_url('/salvar-opiniao/', kwargs)
+
+        self.validar_retorno(cont)
+        return True
+
+    def excluir_opiniao(self, opiniao_id):
+        cont = self.get_url('/excluir-opiniao/', {'opiniao_id': opiniao_id})
+
+        self.validar_retorno(cont)
+        return True
+
+    def salvar_pergunta(self, **kwargs):
+        cont = self.get_url('/salvar-pergunta/', kwargs)
+
+        self.validar_retorno(cont)
+        return True
+
+    def excluir_pergunta(self, pergunta_id):
+        cont = self.get_url('/excluir-pergunta/', {'pergunta_id': pergunta_id})
+
+        self.validar_retorno(cont)
+        return True
 

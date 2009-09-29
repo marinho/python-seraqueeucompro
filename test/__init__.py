@@ -32,21 +32,21 @@ class ApiTest(unittest.TestCase):
     def test_validar_chave(self):
         """Efetua a validacao da chave informada."""
         self._AddHandler(self.api_base_url+'/validar-chave/?chave='+self.chave,
-                     curry(self._OpenTestData, 'validar-chave.json'))
+                curry(self._OpenTestData, 'validar-chave.json'))
 
         self.assertTrue(self._api.validar_chave())
 
     def test_validar_chave_invalida(self):
         """Efetua a validacao da chave informada, sendo ela invalida."""
         self._AddHandler(self.api_base_url+'/validar-chave/?chave=123',
-                     curry(self._OpenTestData, 'validar-chave-invalida.json'))
+                curry(self._OpenTestData, 'validar-chave-invalida.json'))
 
         self.assertRaises(seraqueeucompro.ChaveInvalida, self._api.validar_chave, '123')
 
     def test_pesquisar(self):
         """Efetua uma pesquisa no site pelas palavras-chave informadas."""
         self._AddHandler(self.api_base_url+'/pesquisar/?q=produto%20encontrado',
-                     curry(self._OpenTestData, 'pesquisar.json'))
+                curry(self._OpenTestData, 'pesquisar.json'))
 
         lista = self._api.pesquisar('produto encontrado')
         self.assertEqual(lista, [
@@ -65,7 +65,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_perguntas_por_id(self):
         """Efetua uma requisicao de perguntas de um produto - por ID do produto."""
         self._AddHandler(self.api_base_url+'/listar-perguntas/?produto_id=18',
-                     curry(self._OpenTestData, 'listar-perguntas-por-id.json'))
+                curry(self._OpenTestData, 'listar-perguntas-por-id.json'))
 
         lista = self._api.listar_perguntas(produto_id=18)
         self.assertEqual(lista, [
@@ -87,7 +87,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_perguntas_por_nome(self):
         """Efetua uma requisicao de perguntas de um produto - por marca e nome."""
         self._AddHandler(self.api_base_url+'/listar-perguntas/?produto_nome=Fusca&produto_marca=Volkswagen',
-                     curry(self._OpenTestData, 'listar-perguntas-por-nome.json'))
+                curry(self._OpenTestData, 'listar-perguntas-por-nome.json'))
 
         lista = self._api.listar_perguntas(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(lista, [
@@ -109,7 +109,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_opinioes_por_id(self):
         """Efetua uma requisicao de opinioes de um produto - por ID do produto."""
         self._AddHandler(self.api_base_url+'/listar-opinioes/?produto_id=18',
-                     curry(self._OpenTestData, 'listar-opinioes-por-id.json'))
+                curry(self._OpenTestData, 'listar-opinioes-por-id.json'))
 
         lista = self._api.listar_opinioes(produto_id=18)
         self.assertEqual(lista, [
@@ -132,7 +132,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_opinioes_por_nome(self):
         """Efetua uma requisicao de opinioes de um produto - por marca e nome."""
         self._AddHandler(self.api_base_url+'/listar-opinioes/?produto_nome=Fusca&produto_marca=Volkswagen',
-                     curry(self._OpenTestData, 'listar-opinioes-por-nome.json'))
+                curry(self._OpenTestData, 'listar-opinioes-por-nome.json'))
 
         lista = self._api.listar_opinioes(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(lista, [
@@ -155,7 +155,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_links_por_id(self):
         """Efetua uma requisicao de links de um produto - por ID do produto."""
         self._AddHandler(self.api_base_url+'/listar-links/?produto_id=18',
-                     curry(self._OpenTestData, 'listar-links-por-id.json'))
+                curry(self._OpenTestData, 'listar-links-por-id.json'))
 
         lista = self._api.listar_links(produto_id=18)
         self.assertEqual(lista, [
@@ -166,7 +166,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_links_por_nome(self):
         """Efetua uma requisicao de links de um produto - por marca e nome."""
         self._AddHandler(self.api_base_url+'/listar-links/?produto_nome=Fusca&produto_marca=Volkswagen',
-                     curry(self._OpenTestData, 'listar-links-por-nome.json'))
+                curry(self._OpenTestData, 'listar-links-por-nome.json'))
 
         lista = self._api.listar_links(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(lista, [
@@ -177,7 +177,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_imagens_por_id(self):
         """Efetua uma requisicao de imagens de um produto - por ID do produto."""
         self._AddHandler(self.api_base_url+'/listar-imagens/?produto_id=18',
-                     curry(self._OpenTestData, 'listar-imagens-por-id.json'))
+                curry(self._OpenTestData, 'listar-imagens-por-id.json'))
 
         lista = self._api.listar_imagens(produto_id=18)
         self.assertEqual(lista, [
@@ -188,7 +188,7 @@ class ApiTest(unittest.TestCase):
     def test_listar_imagens_por_nome(self):
         """Efetua uma requisicao de imagens de um produto - por marca e nome."""
         self._AddHandler(self.api_base_url+'/listar-imagens/?produto_nome=Fusca&produto_marca=Volkswagen',
-                     curry(self._OpenTestData, 'listar-imagens-por-nome.json'))
+                curry(self._OpenTestData, 'listar-imagens-por-nome.json'))
 
         lista = self._api.listar_imagens(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(lista, [
@@ -199,7 +199,7 @@ class ApiTest(unittest.TestCase):
     def test_produto_info_por_id(self):
         """Efetua uma requisicao de informacoes de um produto - por ID do produto."""
         self._AddHandler(self.api_base_url+'/info-produto/?produto_id=18',
-                     curry(self._OpenTestData, 'info-produto-por-id.json'))
+                curry(self._OpenTestData, 'info-produto-por-id.json'))
 
         info = self._api.info_produto(produto_id=18)
         self.assertEqual(info, {
@@ -216,7 +216,7 @@ class ApiTest(unittest.TestCase):
     def test_produto_info_por_nome(self):
         """Efetua uma requisicao de informacoes de um produto - por marca e nome."""
         self._AddHandler(self.api_base_url+'/info-produto/?produto_nome=Fusca&produto_marca=Volkswagen',
-                     curry(self._OpenTestData, 'info-produto-por-nome.json'))
+                curry(self._OpenTestData, 'info-produto-por-nome.json'))
 
         info = self._api.info_produto(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(info, {
@@ -240,6 +240,91 @@ class ApiTest(unittest.TestCase):
         url = self._api.painel_produto_url(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(url, self.api_base_url+'/painel-produto/?produto_nome=Fusca&produto_marca=Volkswagen')
 
+    def test_opiniao_salvar_inclusao(self):
+        """Efetua a inclusao de uma opiniao"""
+        self._AddHandler(self.api_base_url+'/salvar-opiniao/',
+                curry(self._OpenTestData, 'salvar-opiniao-inclusao.json'))
+
+        self.assertTrue(self._api.salvar_opiniao(
+            produto_nome='Fusca',
+            produto_marca='Volkswagen',
+            titulo='Nao gostei do volante e nem do cambio',
+            detalhes='Eh isso aih',
+            avaliacao=4,
+            ))
+
+    def test_opiniao_salvar_atualizacao(self):
+        """Efetua a atualizacao de uma opiniao"""
+        self._AddHandler(self.api_base_url+'/salvar-opiniao/',
+                curry(self._OpenTestData, 'salvar-opiniao-atualizacao.json'))
+
+        self.assertTrue(self._api.salvar_opiniao(
+            opiniao_id=18,
+            titulo='Nao gostei do volante e nem do cambio - novo nome',
+            detalhes='Eh isso aih',
+            avaliacao=5,
+            ))
+
+    def test_opiniao_salvar_invalido(self):
+        """Efetua a atualizacao de uma opiniao que retorna invalido"""
+        self._AddHandler(self.api_base_url+'/salvar-opiniao/',
+                curry(self._OpenTestData, 'salvar-opiniao-invalido.json'))
+
+        self.assertRaises(seraqueeucompro.RetornoInvalido, self._api.salvar_opiniao, 
+            opiniao_id=15,
+            titulo='Nao gostei do volante e nem do cambio - novo nome',
+            detalhes='Eh isso aih',
+            avaliacao=5,
+            )
+
+    def test_opiniao_excluir(self):
+        """Efetua a exclusao de uma opiniao"""
+        self._AddHandler(self.api_base_url+'/excluir-opiniao/',
+                curry(self._OpenTestData, 'excluir-opiniao.json'))
+
+        self.assertTrue(self._api.excluir_opiniao(opiniao_id=15))
+
+    def test_pergunta_salvar_inclusao(self):
+        """Efetua a inclusao de uma pergunta"""
+        self._AddHandler(self.api_base_url+'/salvar-pergunta/',
+                curry(self._OpenTestData, 'salvar-pergunta-inclusao.json'))
+
+        self.assertTrue(self._api.salvar_pergunta(
+            produto_nome='Fusca',
+            produto_marca='Volkswagen',
+            titulo='Compro original ou reformo?',
+            detalhes='Teste',
+            ))
+
+    def test_pergunta_salvar_atualizacao(self):
+        """Efetua a atualizacao de uma pergunta"""
+        self._AddHandler(self.api_base_url+'/salvar-pergunta/',
+                curry(self._OpenTestData, 'salvar-pergunta-atualizacao.json'))
+
+        self.assertTrue(self._api.salvar_pergunta(
+            pergunta_id=18,
+            titulo='Compro original ou reformo?',
+            detalhes='Teste',
+            ))
+
+    def test_pergunta_salvar_invalido(self):
+        """Efetua a atualizacao de uma pergunta que retorna invalido"""
+        self._AddHandler(self.api_base_url+'/salvar-pergunta/',
+                curry(self._OpenTestData, 'salvar-pergunta-invalido.json'))
+
+        self.assertRaises(seraqueeucompro.RetornoInvalido, self._api.salvar_pergunta, 
+            pergunta_id=15,
+            titulo='Compro original ou reformo?',
+            detalhes='Teste',
+            )
+
+    def test_pergunta_excluir(self):
+        """Efetua a exclusao de uma pergunta"""
+        self._AddHandler(self.api_base_url+'/excluir-pergunta/',
+                curry(self._OpenTestData, 'excluir-pergunta.json'))
+
+        self.assertTrue(self._api.excluir_pergunta(pergunta_id=15))
+
     # TESTES - O QUE REALMENTE IMPORTA - FINAL
 
     def _AddHandler(self, url, callback):
@@ -257,7 +342,6 @@ class MockUrllib(object):
 
     def __init__(self):
         self._handlers = {}
-        self.HTTPBasicAuthHandler = MockHTTPBasicAuthHandler
 
     def AddHandler(self, url, callback):
         self._handlers[url] = callback
@@ -285,14 +369,6 @@ class MockOpener(object):
         if not self._opened:
             raise Exception('MockOpener closed before it was opened.')
         self._opened = False
-
-class MockHTTPBasicAuthHandler(object):
-    '''A mock replacement for HTTPBasicAuthHandler'''
-
-    def add_password(self, realm, uri, user, passwd):
-        # TODO(dewitt): Add verification that the proper args are passed
-        pass
-
 
 class NullCache(object):
     '''A no-op replacement for the cache class'''
