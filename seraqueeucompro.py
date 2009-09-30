@@ -28,6 +28,10 @@ class Api(object):
         seu conteudo. Caso o retorno seja JSON, converte o retorno antes de
         dar o resultado da funcao"""
 
+        # Seta a chave, caso seja uma requisicao de POST
+        if params:
+            params.setdefault('chave', self.chave)
+
         fp = self.opener.open(self.api_base_url+url, params)
         cont = fp.read()
         fp.close()

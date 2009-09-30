@@ -14,7 +14,7 @@ import seraqueeucompro
 
 class ApiTest(unittest.TestCase):
     persistente = False
-    chave = '12345678901234567890123456789012'
+    chave = '1234567890123456789012345678901234567890'
     api_base_url = 'http://www.seraqueeucompro.com/api/1.0'
     
     def setUp(self):
