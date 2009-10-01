@@ -5,7 +5,7 @@
 
 __author__ = 'marinho@gmail.com'
 
-import os, sys, simplejson, unittest, urllib
+import os, sys, simplejson, unittest, urllib, urllib2
 
 lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 sys.path.insert(0, lib_path)
@@ -19,16 +19,22 @@ class ApiTest(unittest.TestCase):
     
     def setUp(self):
         if self.persistente:
-            self._urllib = urllib
+            self._urllib = urllib2
         else:
             self._urllib = MockUrllib()
 
-        api = seraqueeucompro.Api(chave=self.chave)
+        api = seraqueeucompro.Api(chave=self.chave, api_base_url=self.api_base_url)
         api.set_urllib(self._urllib)
         self._api = api
 
-    # TESTES - O QUE REALMENTE IMPORTA - INICIO
+    def _AddHandler(self, url, callback):
+        if not self.persistente:
+            self._urllib.AddHandler(url, callback)
 
+    def _OpenTestData(self, filename):
+        return open(os.path.join('testdata',filename))
+
+class ApiNaoPersistenteTest(ApiTest):
     def test_validar_chave(self):
         """Efetua a validacao da chave informada."""
         self._AddHandler(self.api_base_url+'/validar-chave/?chave='+self.chave,
@@ -204,10 +210,10 @@ class ApiTest(unittest.TestCase):
         info = self._api.info_produto(produto_id=18)
         self.assertEqual(info, {
             'nome': 'Fusca',
-            'marca': 'Volkswagen',
+            'marca': {'id': 10, 'nome': 'Volkswagen'},
             'url': 'http://www.seraqueeucompro.com/produtos/18/',
             'produto_url': 'http://www.fusca.com',
-            'categoria': 'Automoveis',
+            'categoria': {'id': 10, 'nome': 'Automoveis'},
             'slug': 'fusca',
             'tags': ['carros','esporte','classicos'],
             'descricao': 'O Fusca foi o carro mais vendido da historia do automovel',
@@ -221,10 +227,10 @@ class ApiTest(unittest.TestCase):
         info = self._api.info_produto(produto_nome='Fusca', produto_marca='Volkswagen')
         self.assertEqual(info, {
             'nome': 'Fusca',
-            'marca': 'Volkswagen',
+            'marca': {'id': 10, 'nome': 'Volkswagen'},
             'url': 'http://www.seraqueeucompro.com/produtos/18/',
             'produto_url': 'http://www.fusca.com',
-            'categoria': 'Automoveis',
+            'categoria': {'id': 10, 'nome': 'Automoveis'},
             'slug': 'fusca',
             'tags': ['carros','esporte','classicos'],
             'descricao': 'O Fusca foi o carro mais vendido da historia do automovel',
@@ -325,17 +331,77 @@ class ApiTest(unittest.TestCase):
 
         self.assertTrue(self._api.excluir_pergunta(pergunta_id=15))
 
-    # TESTES - O QUE REALMENTE IMPORTA - FINAL
+class ApiPersistenteTest(ApiTest):
+    persistente = True
+    api_base_url = 'http://localhost:8080/api/1.0'
+    chave = '1574bddb75c78a6fd2251d61e2993b5146201319'
 
-    def _AddHandler(self, url, callback):
-        self._urllib.AddHandler(url, callback)
+    def test_validar_chave(self):
+        """Efetua a validacao da chave informada."""
+        self.assertTrue(self._api.validar_chave())
 
-    def _OpenTestData(self, filename):
-        return open(os.path.join('testdata',filename))
+    def test_opiniao_salvar(self):
+        """Efetua a inclusao de uma opiniao e depois efetua sua alteracao"""
+        opiniao_id = self._api.salvar_opiniao(
+            produto_nome='Fusca',
+            produto_marca_nome='Volkswagen',
+            produto_categoria_nome='Automoveis',
+            descricao='Nao gostei do volante e nem do cambio',
+            detalhes='Eh isso aih',
+            avaliacao=4,
+            )
 
-#class ApiPersistenteTest(ApiTest):
-#    persistente = True
-#    api_base_url = 'http://localhost:8080/api/1.0'
+        self.assertTrue(opiniao_id)
+
+        # Efetua a alteracao da opiniao
+        self.assertTrue(self._api.salvar_opiniao(
+            opiniao_id=opiniao_id,
+            descricao='Nao gostei do volante e nem do cambio - novo nome',
+            detalhes='Eh isso aih',
+            avaliacao=5,
+            ))
+
+        # Efetua a exclusao de uma opiniao
+        self.assertTrue(self._api.excluir_opiniao(opiniao_id=opiniao_id))
+
+    def test_opiniao_salvar_invalido(self):
+        """Efetua a atualizacao de uma opiniao que retorna invalido"""
+        self.assertRaises(seraqueeucompro.RetornoInvalido, self._api.salvar_opiniao, 
+            opiniao_id=108,
+            descricao='Nao gostei do volante e nem do cambio - novo nome',
+            detalhes='Eh isso aih',
+            avaliacao=5,
+            )
+
+    def test_pergunta_salvar(self):
+        """Efetua a inclusao de uma pergunta e depois efetua sua alteracao"""
+        pergunta_id = self._api.salvar_pergunta(
+            produto_nome='Fusca',
+            produto_marca_nome='Volkswagen',
+            produto_categoria_nome='Automoveis',
+            descricao='Compro original ou reformo?',
+            detalhes='Teste',
+            )
+
+        self.assertTrue(pergunta_id)
+
+        # Efetua a alteracao da pergunta
+        self.assertTrue(self._api.salvar_pergunta(
+            pergunta_id=pergunta_id,
+            descricao='Compro original ou reformo?',
+            detalhes='Teste',
+            ))
+
+        # Efetua a exclusao da pergunta
+        self.assertTrue(self._api.excluir_pergunta(pergunta_id=pergunta_id))
+
+    def test_pergunta_salvar_invalido(self):
+        """Efetua a atualizacao de uma pergunta que retorna invalido"""
+        self.assertRaises(seraqueeucompro.RetornoInvalido, self._api.salvar_pergunta, 
+            pergunta_id=150,
+            descricao='Compro original ou reformo?',
+            detalhes='Teste',
+            )
 
 class MockUrllib(object):
     '''A mock replacement for urllib that hardcodes specific responses.'''
