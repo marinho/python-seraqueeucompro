@@ -253,7 +253,7 @@ class ApiNaoPersistenteTest(ApiTest):
 
         self.assertTrue(self._api.salvar_opiniao(
             produto_nome='Fusca',
-            produto_marca='Volkswagen',
+            produto_marca_nome='Volkswagen',
             titulo='Nao gostei do volante e nem do cambio',
             detalhes='Eh isso aih',
             avaliacao=4,
@@ -297,7 +297,7 @@ class ApiNaoPersistenteTest(ApiTest):
 
         self.assertTrue(self._api.salvar_pergunta(
             produto_nome='Fusca',
-            produto_marca='Volkswagen',
+            produto_marca_nome='Volkswagen',
             titulo='Compro original ou reformo?',
             detalhes='Teste',
             ))
@@ -330,6 +330,49 @@ class ApiNaoPersistenteTest(ApiTest):
                 curry(self._OpenTestData, 'excluir-pergunta.json'))
 
         self.assertTrue(self._api.excluir_pergunta(pergunta_id=15))
+
+    def test_produto_salvar_inclusao(self):
+        """Efetua a inclusao de um produto e depois efetua sua alteracao"""
+        self._AddHandler(self.api_base_url+'/salvar-produto/',
+                curry(self._OpenTestData, 'salvar-produto-inclusao.json'))
+        
+        produto_id = self._api.salvar_produto(
+            nome='Gol',
+            marca_nome='Volkswagen',
+            categoria_nome='Automoveis',
+            tags=['gol','teste'],
+            descricao='Compro original ou reformo?',
+            )
+
+        self.assertTrue(produto_id)
+
+    def test_produto_salvar_alteracao(self):
+        """Efetua a alteracao do produto"""
+        self._AddHandler(self.api_base_url+'/salvar-produto/',
+                curry(self._OpenTestData, 'salvar-produto-alteracao.json'))
+        
+        self.assertTrue(self._api.salvar_produto(
+            produto_id=20,
+            descricao='Compro original ou reformo?',
+            ))
+
+    def test_produto_salvar_invalido(self):
+        """Efetua a atualizacao de um produto que retorna invalido"""
+        self._AddHandler(self.api_base_url+'/salvar-produto/',
+                curry(self._OpenTestData, 'salvar-produto-invalido.json'))
+
+        self.assertRaises(seraqueeucompro.RetornoInvalido, self._api.salvar_produto, 
+            produto_id=150,
+            nome='Gol',
+            descricao='Teste de produto',
+            )
+
+    def test_produto_excluir(self):
+        """Efetua a exclusao do produto"""
+        self._AddHandler(self.api_base_url+'/excluir-produto/',
+                curry(self._OpenTestData, 'excluir-produto.json'))
+        
+        self.assertTrue(self._api.excluir_produto(produto_id=20))
 
 class ApiPersistenteTest(ApiTest):
     persistente = True
@@ -402,6 +445,27 @@ class ApiPersistenteTest(ApiTest):
             descricao='Compro original ou reformo?',
             detalhes='Teste',
             )
+
+    def test_produto_salvar(self):
+        """Efetua a inclusao de um produto e depois efetua sua alteracao"""
+        produto_id = self._api.salvar_produto(
+            nome='Gol',
+            marca_nome='Volkswagen',
+            categoria_nome='Automoveis',
+            tags=['gol','teste'],
+            descricao='Compro original ou reformo?',
+            )
+
+        self.assertTrue(produto_id)
+
+        # Efetua a alteracao do produto
+        self.assertTrue(self._api.salvar_produto(
+            produto_id=produto_id,
+            descricao='Compro original ou reformo?',
+            ))
+
+        # Efetua a exclusao do produto
+        self.assertTrue(self._api.excluir_produto(produto_id=produto_id))
 
 class MockUrllib(object):
     '''A mock replacement for urllib that hardcodes specific responses.'''

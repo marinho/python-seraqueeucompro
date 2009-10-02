@@ -179,3 +179,16 @@ class Api(object):
         self.validar_retorno(cont)
         return True
 
+    def salvar_produto(self, **kwargs):
+        cont = self.get_url('/salvar-produto/', kwargs)
+
+        self.validar_retorno(cont)
+
+        return cont['id']
+
+    def excluir_produto(self, produto_id):
+        cont = self.get_url('/excluir-produto/', {'produto_id': produto_id})
+
+        self.validar_retorno(cont)
+        return True
+
